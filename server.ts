@@ -12,8 +12,6 @@ mongoose.set('strictQuery', true)
 const port = process.env.PORT
 const password = process.env.MONGODB_PASSWORD
 const mongodb_url = `mongodb+srv://nawat180844:${password}@cluster0.hlsf9bl.mongodb.net/?retryWrites=true&w=majority`
-//mongodb+srv://nawat1808:<password>@cluster0.hlsf9bl.mongodb.net/?retryWrites=true&w=majority
-console.log(mongodb_url)
 mongoose.connect(mongodb_url)
 interface ITodo extends Document {
     task: String,
@@ -62,6 +60,12 @@ app.post('/', (request: Request, response: Response) => {
     const newTask = request.body.newTask
     if (request.body.type === 'School') {
         path = 'school'
+    }
+    if (request.body.isDone !== '' && newTask === '' && request.body.delete === undefined) {
+        const update_id = request.body.isDone
+        Todo.findOneAndUpdate({ _id: update_id }, [{ $set: { isDone: { $not: "$isDone" } } }], () => {
+            response.redirect(path)
+        })
     }
     if (newTask !== '') {
         const task = new Todo({
